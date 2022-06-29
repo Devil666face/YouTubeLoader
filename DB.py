@@ -16,22 +16,30 @@ class Database:
             print(f'Ошибка выполения запроса\n{query}\n{ex}')
 
     def create_playlist_table(self):
-        create_query = f'CREATE TABLE "playlists" ("playlist_id" TEXT NOT NULL UNIQUE, "title" TEXT NOT NULL, "image" TEXT NOT NULL, PRIMARY KEY("playlist_id"));'
+        create_query = f'CREATE TABLE "playlists" ("playlist_id" TEXT NOT NULL UNIQUE, "title" TEXT NOT NULL, "image" BLOB NOT NULL, PRIMARY KEY("playlist_id"));'
         self.exec_and_save(create_query)
 
     def create_video_table(self, playlis_id):
-        create_query = f'CREATE TABLE "{playlis_id}" ("video_id" TEXT NOT NULL UNIQUE, "title" TEXT NOT NULL, "image" TEXT NOT NULL, PRIMARY KEY("video_id"));'
+        create_query = f'CREATE TABLE "{playlis_id}" ("video_id" TEXT NOT NULL UNIQUE, "title" TEXT NOT NULL, "image" BLOB NOT NULL, PRIMARY KEY("video_id"));'
         self.exec_and_save(create_query)
 
     def insert_video_data_for_playlist(self, playlist_id, playlist_dict):
         for video_id in playlist_dict.keys():
-            insert_query = f'INSERT INTO "{playlist_id}" VALUES ("https://www.youtube.com/watch?v={video_id}","{playlist_dict[video_id][0]}","{playlist_dict[video_id][1]}");'
-            self.exec_and_save(insert_query)
+            # insert_query = f'INSERT INTO "{playlist_id}" VALUES ("https://www.youtube.com/watch?v={video_id}","{playlist_dict[video_id][0]}","{playlist_dict[video_id][1]}");'
+            insert_query = f'INSERT INTO "{playlist_id}" VALUES (?,?,?);'
+            parametrs = (f'https://www.youtube.com/watch?v={video_id}', playlist_dict[video_id][0], playlist_dict[video_id][1])
+            self.cursor.execute(insert_query,parametrs)
+            self.connection.commit()
+            # self.exec_and_save(insert_query)
 
     def insert_playlist_data(self, playlist_dict):
         for playlist_id in playlist_dict.keys():
-            insert_query = f'INSERT INTO "playlists" VALUES ("{playlist_id}","{playlist_dict[playlist_id][0]}","{playlist_dict[playlist_id][1]}");'
-            self.exec_and_save(insert_query)
+            # insert_query = f'INSERT INTO "playlists" VALUES ("{playlist_id}","{playlist_dict[playlist_id][0]}","{playlist_dict[playlist_id][1]}");'
+            insert_query = f'INSERT INTO "playlists" VALUES (?,?,?);'
+            # self.exec_and_save(insert_query)
+            parametrs = (playlist_id, playlist_dict[playlist_id][0], playlist_dict[playlist_id][1])
+            self.cursor.execute(insert_query, parametrs)
+            self.connection.commit()
 
     def save_all(self, video_dict_for_playlist, playlist_dict):
         self.delete_all_tables()

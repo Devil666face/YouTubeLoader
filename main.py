@@ -33,11 +33,13 @@ def get_json_search(channel_name,url_channel):
 def get_json_channel():
     pass
 
-# def get_icon(url,id):
-#     request = requests.get(url)
-#     print(request.content)
-#     # with open(f"{id}.jpg",'wb') as image:
-#     #     image.write(request.content)
+def get_icon(url):
+    request = requests.get(url)
+    print(url)
+    with open(f"temp",'wb') as image:
+        image.write(request.content)
+    with open(f"temp",'rb') as image:
+        return image.read()
 
 
 def get_json_playlists(channel_id):
@@ -47,7 +49,7 @@ def get_json_playlists(channel_id):
     playlist_ids = data['items']
     playlist_dict = {}
     for playlist in playlist_ids:
-        playlist_dict[playlist['id']] = str(playlist['snippet']['title']).replace('"',''), playlist['snippet']['thumbnails']['medium']['url']
+        playlist_dict[playlist['id']] = str(playlist['snippet']['title']).replace('"',''), get_icon(playlist['snippet']['thumbnails']['medium']['url'])
         # get_icon(playlist['snippet']['thumbnails']['medium']['url'],playlist['id'])
     return playlist_dict
 
@@ -60,7 +62,7 @@ def get_json_video(playlist_id):
     video_dict = {}
     for video_obj in video_ids:
         try:
-            video_dict[video_obj['contentDetails']['videoId']] = str(video_obj['snippet']['title']).replace('"',''), video_obj['snippet']['thumbnails']['medium']['url']
+            video_dict[video_obj['contentDetails']['videoId']] = str(video_obj['snippet']['title']).replace('"',''), get_icon(video_obj['snippet']['thumbnails']['medium']['url'])
         except:
             print(f"Ошибка добавления видео {video_obj['contentDetails']['videoId']}")
     return video_dict
