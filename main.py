@@ -4,10 +4,8 @@
 #'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId=PLg5SS_4L6LYvN1RqaVesof8KAf-02fJSi&key=AIzaSyBI8LuIFg3lxi1cl7OIscifGeraB3bKnwM'
 
 import requests
-import lxml
 import json
 from config import API_TOKEN
-from bs4 import BeautifulSoup
 
 def get_json_search(channel_name):
     request = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_name}&type=channel&key={API_TOKEN}")
@@ -45,6 +43,13 @@ def get_json_video(playlist_id):
             print(f"Ошибка добавления видео {video_obj['contentDetails']['videoId']}")
     return video_dict
 
+def get_video_dict_for_playlist(playlist_dict):
+    video_dict_for_playlist = {}
+    for playlist_id in playlist_dict.keys():
+        video_dict_for_playlist[playlist_id] = get_json_video(playlist_id)
+    return video_dict_for_playlist
+
+
 def get_channel_id(url_channel:str):
     type_of_channel_name = url_channel.split('www.youtube.com')[1].split('/')[1]
     match type_of_channel_name:
@@ -62,9 +67,7 @@ if __name__ == '__main__':
     url_channel = input()
     channel_id = get_channel_id(url_channel.replace('/featured',''))
     playlist_dict = get_json_playlists(channel_id)
-    video_dict_for_playlist = {}
-    for playlist_id in playlist_dict.keys():
-        video_dict_for_playlist[playlist_id] = get_json_video(playlist_id)
+    video_dict_for_playlist = get_video_dict_for_playlist(playlist_dict)
 
     for playlist_id in video_dict_for_playlist.keys():
         playlist_dict_temp = video_dict_for_playlist[playlist_id]
