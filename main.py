@@ -33,6 +33,12 @@ def get_json_search(channel_name,url_channel):
 def get_json_channel():
     pass
 
+# def get_icon(url,id):
+#     request = requests.get(url)
+#     print(request.content)
+#     # with open(f"{id}.jpg",'wb') as image:
+#     #     image.write(request.content)
+
 
 def get_json_playlists(channel_id):
     request = requests.get(
@@ -42,12 +48,13 @@ def get_json_playlists(channel_id):
     playlist_dict = {}
     for playlist in playlist_ids:
         playlist_dict[playlist['id']] = str(playlist['snippet']['title']).replace('"',''), playlist['snippet']['thumbnails']['medium']['url']
+        # get_icon(playlist['snippet']['thumbnails']['medium']['url'],playlist['id'])
     return playlist_dict
 
 
 def get_json_video(playlist_id):
     request = requests.get(
-        f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId={playlist_id}&key={API_TOKEN}")
+        f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=400&playlistId={playlist_id}&key={API_TOKEN}")
     data = request.json()
     video_ids = data['items']
     video_dict = {}
