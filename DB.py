@@ -56,7 +56,6 @@ class Database:
         table_name_list = []
         for query in self.cursor:
             table_name_list.append(query[0])
-            print(table_name_list[len(table_name_list)-1])
         for table_name in table_name_list:
             delete_query = f'DROP TABLE "{table_name}";'
             self.exec_and_save(delete_query)

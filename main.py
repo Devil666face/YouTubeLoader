@@ -14,7 +14,7 @@ from DB import Database
 def get_json_search(channel_name,url_channel):
     try:
         request = requests.get(
-            f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_name}&type=channel&key={API_TOKEN}")
+            f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_name}&type=channel&key={API_TOKEN()}")
         data = request.json()
         channel_id = data['items'][0]['id']['channelId']
         return channel_id
@@ -23,8 +23,7 @@ def get_json_search(channel_name,url_channel):
         soup = BeautifulSoup(request.text, "lxml")
         channel_title_name = str(soup.title.string).replace(' - YouTube','')
         request = requests.get(
-            f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_title_name}&type=channel&key={API_TOKEN}")
-        print(f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_title_name}&type=channel&key={API_TOKEN}")
+            f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_title_name}&type=channel&key={API_TOKEN()}")
         data = request.json()
         channel_id = data['items'][0]['id']['channelId']
         return channel_id
@@ -35,34 +34,35 @@ def get_json_channel():
 
 def get_icon(url):
     request = requests.get(url)
-    print(url)
-    with open(f"temp",'wb') as image:
-        image.write(request.content)
-    with open(f"temp",'rb') as image:
-        return image.read()
+    return request.content
+    # with open(f"temp",'wb') as image:
+    #     image.write(request.content)
+    # with open(f"temp",'rb') as image:
+    #     return image.read()
 
 
 def get_json_playlists(channel_id):
     request = requests.get(
-        f"https://youtube.googleapis.com/youtube/v3/playlists?part=snippet%2CcontentDetails&channelId={channel_id}&maxResults=50&key={API_TOKEN}")
+        f"https://youtube.googleapis.com/youtube/v3/playlists?part=snippet%2CcontentDetails&channelId={channel_id}&maxResults=50&key={API_TOKEN()}")
     data = request.json()
     playlist_ids = data['items']
     playlist_dict = {}
     for playlist in playlist_ids:
         playlist_dict[playlist['id']] = str(playlist['snippet']['title']).replace('"',''), get_icon(playlist['snippet']['thumbnails']['medium']['url'])
-        # get_icon(playlist['snippet']['thumbnails']['medium']['url'],playlist['id'])
+
     return playlist_dict
 
 
 def get_json_video(playlist_id):
     request = requests.get(
-        f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=400&playlistId={playlist_id}&key={API_TOKEN}")
+        f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=400&playlistId={playlist_id}&key={API_TOKEN()}")
     data = request.json()
     video_ids = data['items']
     video_dict = {}
     for video_obj in video_ids:
         try:
             video_dict[video_obj['contentDetails']['videoId']] = str(video_obj['snippet']['title']).replace('"',''), get_icon(video_obj['snippet']['thumbnails']['medium']['url'])
+            print(f"Считываю видео: {str(video_obj['snippet']['title'])}")
         except:
             print(f"Ошибка добавления видео {video_obj['contentDetails']['videoId']}")
     return video_dict
