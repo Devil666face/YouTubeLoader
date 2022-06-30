@@ -11,7 +11,7 @@ from config import API_TOKEN
 from DB import Database
 
 
-def get_json_search(channel_name,url_channel):
+def get_json_search(channel_name,url_channel=''):
     try:
         request = requests.get(
             f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={channel_name}&type=channel&key={API_TOKEN()}")
@@ -76,17 +76,20 @@ def get_video_dict_for_playlist(playlist_dict):
 
 
 def get_channel_id(url_channel: str):
-    type_of_channel_name = url_channel.split('www.youtube.com')[1].split('/')[1]
-    match type_of_channel_name:
-        case 'channel':
-            channel_id = url_channel.split('www.youtube.com')[1].split('/')[2]
-            return channel_id
-        case 'c':
-            channel_name = url_channel.split('www.youtube.com')[1].split('/')[2]
-            return get_json_search(channel_name, url_channel)
-        case 'user':
-            channel_name = url_channel.split('www.youtube.com')[1].split('/')[2]
-            return get_json_search(channel_name, url_channel)
+    try:
+        type_of_channel_name = url_channel.split('www.youtube.com')[1].split('/')[1]
+        match type_of_channel_name:
+            case 'channel':
+                channel_id = url_channel.split('www.youtube.com')[1].split('/')[2]
+                return channel_id
+            case 'c':
+                channel_name = url_channel.split('www.youtube.com')[1].split('/')[2]
+                return get_json_search(channel_name, url_channel)
+            case 'user':
+                channel_name = url_channel.split('www.youtube.com')[1].split('/')[2]
+                return get_json_search(channel_name, url_channel)
+    except:
+        return get_json_search(channel_name=url_channel)
 
 
 if __name__ == '__main__':
