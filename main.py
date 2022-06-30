@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from config import API_TOKEN
 from DB import Database
 
-
 def get_json_search(channel_name,url_channel=''):
     try:
         request = requests.get(
