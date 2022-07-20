@@ -9,6 +9,7 @@ import lxml
 from bs4 import BeautifulSoup
 from config import API_TOKEN
 from DB import Database
+from download import download_video
 
 def get_json_search(channel_name,url_channel=''):
     try:
@@ -32,13 +33,9 @@ def get_json_channel():
     pass
 
 def get_icon(url):
-    request = requests.get(url)
-    return request.content
-    # with open(f"temp",'wb') as image:
-    #     image.write(request.content)
-    # with open(f"temp",'rb') as image:
-    #     return image.read()
-
+    # request = requests.get(url)
+    # return request.content
+    return False
 
 def get_json_playlists(channel_id):
     request = requests.get(
@@ -48,7 +45,7 @@ def get_json_playlists(channel_id):
     playlist_dict = {}
     for playlist in playlist_ids:
         playlist_dict[playlist['id']] = str(playlist['snippet']['title']).replace('"',''), get_icon(playlist['snippet']['thumbnails']['medium']['url'])
-
+        # print(f'Загружаю плейлист '+str(playlist['snippet']['title']).replace('"',''))
     return playlist_dict
 
 
@@ -61,7 +58,7 @@ def get_json_video(playlist_id):
     for video_obj in video_ids:
         try:
             video_dict[video_obj['contentDetails']['videoId']] = str(video_obj['snippet']['title']).replace('"',''), get_icon(video_obj['snippet']['thumbnails']['medium']['url'])
-            print(f"Считываю видео: {str(video_obj['snippet']['title'])}")
+            #print(f"Считываю видео: {str(video_obj['snippet']['title'])}")
         except:
             print(f"Ошибка добавления видео {video_obj['contentDetails']['videoId']}")
     return video_dict
@@ -90,6 +87,22 @@ def get_channel_id(url_channel: str):
     except:
         return get_json_search(channel_name=url_channel)
 
+def get_current_playlist_name(playlist_dict):
+    for (i,playlist_id) in enumerate(playlist_dict.keys()):
+        print(f'{i}. {playlist_dict[playlist_id][0]}')
+
+    current_playlist_number = input("Введите цифру плейлиста для загрузки\n")
+
+    for (i, playlist_id) in enumerate(playlist_dict.keys()):
+        if i==int(current_playlist_number):
+            print(f'Для загрузки выбран плейлист: {playlist_dict[playlist_id][0]}')
+            return playlist_id, playlist_dict[playlist_id][0]
+
+def download_playlist(current_playlist_id,current_playlist_name, video_dict_for_playlist):
+    video_dict = video_dict_for_playlist[current_playlist_id]
+    for video_id in video_dict.keys():
+        url_to_video = f"https://www.youtube.com/watch?v={video_id}"
+        download_video(url_to_video,current_playlist_name)
 
 if __name__ == '__main__':
     url_channel = sys.argv[1]
@@ -104,4 +117,9 @@ if __name__ == '__main__':
     playlist_dict = get_json_playlists(channel_id)
     video_dict_for_playlist = get_video_dict_for_playlist(playlist_dict)
     db.save_all(video_dict_for_playlist, playlist_dict)
+
+    current_playlist_id, current_playlist_name = get_current_playlist_name(playlist_dict)
+
+    download_playlist(current_playlist_id,current_playlist_name,video_dict_for_playlist)
+
     del db
