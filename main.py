@@ -105,14 +105,12 @@ def download_playlist(current_playlist_id,current_playlist_name, video_dict_for_
         download_video(url_to_video,current_playlist_name)
 
 if __name__ == '__main__':
-    url_channel = sys.argv[1]
-    if len(sys.argv)>2:
-        exec_path_for_windows = sys.argv[2]
-        db = Database(exec_path_for_windows + "/database.db")
+    url_channel = ''
+    if len(sys.argv)>1:
+        url_channel = sys.argv[1]
     else:
-        db = Database("database.db")
-
-    # url_channel = input()
+        url_channel = input("Отпрвьте ссылку на канал\n")
+    db = Database("database.db")
     channel_id = get_channel_id(url_channel.replace('/featured', ''))
     playlist_dict = get_json_playlists(channel_id)
     video_dict_for_playlist = get_video_dict_for_playlist(playlist_dict)
